@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+.git/
+.idea/
+.vscode/
+.DS_Store
+.env
+data/

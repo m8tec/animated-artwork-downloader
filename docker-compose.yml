@@ -1,0 +1,17 @@
+services:
+  animated-artwork-downloader:
+    container_name: animated-artwork-downloader
+    build:
+      context: .
+      dockerfile: AnimatedArtworkDownloader/Dockerfile
+    image: animated-artwork-downloader:latest
+    environment:
+      SyncConfig__LibraryPath: ${LIBRARY_PATH:-/music}
+      SyncConfig__ArtworkApiUrl: ${ARTWORK_API_URL:-http://host.docker.internal:5277}
+      SyncConfig__DelayBetweenApiRequestsMs: ${DELAY_BETWEEN_API_REQUESTS_MS:-2000}
+      SyncConfig__MinVariantResolution: ${MIN_VARIANT_RESOLUTION:-1000}
+      SyncConfig__WebpQuality: ${WEBP_QUALITY:-50}
+    volumes:
+      - ${MUSIC_LIBRARY_PATH:?Set MUSIC_LIBRARY_PATH in .env}:${LIBRARY_PATH:-/music}
+      - ${CACHE_DIRECTORY:-./data}:/data
+    restart: unless-stopped

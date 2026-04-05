@@ -1,0 +1,8 @@
+**/bin/**
+**/obj/**
+.idea
+
+**/.DS_Store
+
+**/appsettings.Development.json
+**/.env
