@@ -1,0 +1,11 @@
+services:
+  animated-artworks:
+    build:
+      context: ../apple-music-animated-artworks
+      dockerfile: Dockerfile
+
+  animated-artwork-downloader:
+    build:
+      context: .
+      dockerfile: AnimatedArtworkDownloader/Dockerfile
+    image: ghcr.io/m8tec/animated-artwork-downloader:latest
