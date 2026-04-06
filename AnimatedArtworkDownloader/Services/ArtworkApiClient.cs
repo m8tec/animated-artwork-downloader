@@ -13,6 +13,47 @@ public class ArtworkApiClient(
     ILogger<ArtworkApiClient> logger)
 {
     private const string ClientName = "ArtworkApi";
+    private static readonly TimeSpan StartupProbeInterval = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan StartupProbeTimeout = TimeSpan.FromSeconds(3);
+
+    public async Task WaitUntilApiIsReachableAsync(CancellationToken cancellationToken)
+    {
+        var baseUrl = config.Value.ArtworkApiUrl.Trim();
+
+        if (string.IsNullOrWhiteSpace(baseUrl))
+        {
+            throw new InvalidOperationException("ArtworkApiUrl is not configured.");
+        }
+
+        var client = httpClientFactory.CreateClient(ClientName);
+        var attempts = 0;
+
+        while (true)
+        {
+            attempts++;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeoutCts.CancelAfter(StartupProbeTimeout);
+
+                using var response = await client.GetAsync(baseUrl, timeoutCts.Token);
+                logger.LogInformation("Artwork API is reachable at {BaseUrl} (status {StatusCode}) after {Attempts} attempt{Plural}.", baseUrl, (int)response.StatusCode, attempts, attempts == 1 ? string.Empty : "s");
+                return;
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.LogInformation("Waiting for Artwork API at {BaseUrl} (attempt {Attempt}): {Reason}", baseUrl, attempts, ex.Message);
+            }
+            catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                logger.LogInformation("Waiting for Artwork API at {BaseUrl} (attempt {Attempt} timed out after {TimeoutSeconds}s)...", baseUrl, attempts, (int)StartupProbeTimeout.TotalSeconds);
+            }
+
+            await Task.Delay(StartupProbeInterval, cancellationToken);
+        }
+    }
 
     public async Task<ArtworkSearchResult> SearchAnimatedCoverAsync(string artist, string album, CancellationToken cancellationToken)
     {

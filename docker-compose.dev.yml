@@ -1,7 +1,7 @@
 services:
   animated-artworks:
     build:
-      context: ../apple-music-animated-artworks
+      context: ../apple-music-animated-artworks/apple-music-animated-artworks
       dockerfile: Dockerfile
 
   animated-artwork-downloader:

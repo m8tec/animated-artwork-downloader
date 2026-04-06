@@ -6,3 +6,5 @@
 
 **/appsettings.Development.json
 **/.env
+
+data/**
