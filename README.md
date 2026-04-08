@@ -4,13 +4,41 @@ Download animated artworks from Apple Music straight to your local music library
 
 The files can be used by Navidrome, a self-hosted music server, which supports showing animated artworks when they are stored as `cover.webp` in the album folder.
 
-## Docker
+## Features
+- Download animated artworks for albums in your music library
+- MP4 to WebP conversion using ffmpeg
+- Supported by Navidrome
+- Configurable minimum resolution for artworks
+- Configurable WebP quality for artwork conversion
 
-The default Docker setup pulls published images from GHCR and does not require a local build:
+## Getting Started (Docker)
 
 ```bash
-docker compose up -d
+# Clone the repository
+git clone https://github.com/m8tec/animated-artwork-downloader.git
+cd animated-artwork-downloader
+
+# Configure
+cp .env.example .env
+nano .env  # Edit with your settings
+
+# Start
+docker-compose up -d
+
+# Watch logs
+docker-compose logs -f
 ```
+
+This will start two containers: the downloader and the API. The downloader will periodically check your music library for albums without `cover.webp` and attempt to download the animated artwork for them. The API container runs the [Apple Music Animated Artworks API](https://github.com/m8tec/apple-music-animated-artworks), which the downloader uses to fetch the artworks. It can also be used at `http://localhost:8080` to manually query for artworks.
+
+## How It Works
+
+1. The downloader scans the specified music library directory for folders containing music files which do not have a `cover.webp` file.
+2. For each album folder, it extracts the artist and album name from the metadata of a music file.
+3. It queries the API for an animated artwork matching the artist and album.
+4. If an artwork is found, it downloads the MP4 file, converts it to WebP format using ffmpeg, and saves it as `cover.webp` in the album folder.
+
+## Development
 
 For local development with source builds, use the dev override:
 
@@ -21,10 +49,3 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 That setup expects the API repository to be cloned next to this one as `../apple-music-animated-artworks`.
 
 The default compose expects the API service to be reachable as `http://animated-artworks:8080` inside the Docker network.
-
-## Features
-- Download animated artworks for albums in your music library
-- MP4 to WebP conversion using ffmpeg
-- Supported by Navidrome
-- Configurable minimum resolution for artworks
-- Configurable WebP quality for artwork conversion
