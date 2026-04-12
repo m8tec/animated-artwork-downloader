@@ -1,8 +1,12 @@
 # Animated Artwork Downloader
 
-Download animated artworks from Apple Music straight to your local music library as WebP images, using the [Apple Music Animated Artworks](https://github.com/m8tec/apple-music-animated-artworks) API.
+Automated downloader for Apple Music animated artworks in your local music library.
+The tool regularly scans a specified directory for music albums and downloads the missing animated artworks as WebP images, using the [Apple Music Animated Artworks](https://github.com/m8tec/apple-music-animated-artworks) API for fetching the artworks.
 
-The files can be used by Navidrome, a self-hosted music server, which supports showing animated artworks when they are stored as `cover.webp` in the album folder.
+The downloaded artworks are saved as `cover.webp` in the respective album folders and can be used by music servers like Navidrome for displaying.
+
+> [!TIP]
+> For manually downloading animated artworks as WebP or MP4, head over to the [public instance](https://artwork.m8tec.top) of the [Apple Music Animated Artworks](https://github.com/m8tec/apple-music-animated-artworks) API, which also has a simple search interface.
 
 ## Features
 - Download animated artworks for albums in your music library
