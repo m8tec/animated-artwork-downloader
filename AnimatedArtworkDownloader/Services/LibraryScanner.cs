@@ -6,7 +6,7 @@ namespace AnimatedArtworkDownloader.Services;
 
 public class LibraryScanner(IOptions<SyncConfig> config, ILogger<LibraryScanner> logger)
 {
-    private readonly string[] _supportedExtensions = [".mp3", ".flac", ".m4a", ".ogg", ".wma", ".aac", ".wav"];
+    private readonly string[] _supportedExtensions = [".mp3", ".flac", ".m4a", ".ogg", ".opus", ".wma", ".aac", ".wav"];
 
     public IEnumerable<AlbumDirectory> ScanLibrary()
     {
