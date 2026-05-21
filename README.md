@@ -35,6 +35,10 @@ docker-compose logs -f
 
 This will start two containers: the downloader and the API. The downloader will periodically check your music library for albums without `cover.webp` and attempt to download the animated artwork for them. The API container runs the [Apple Music Animated Artworks API](https://github.com/m8tec/apple-music-animated-artworks), which the downloader uses to fetch the artworks. It can also be used at `http://localhost:8080` to manually query for artworks.
 
+## Configuration
+- `MIN_VARIANT_RESOLUTION`: Minimum resolution for downloaded artworks, set lower to reduce file size. The closest available variant with at least this resolution will be downloaded.
+- `WEBP_QUALITY`: Quality setting for WebP conversion (0-100), lower values reduce file size but also quality
+
 ## How It Works
 
 1. The downloader scans the specified music library directory for folders containing music files which do not have a `cover.webp` file.
