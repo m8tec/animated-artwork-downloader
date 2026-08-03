@@ -19,6 +19,7 @@ services:
       - animated-artworks
     environment:
       SyncConfig__LibraryPath: ${LIBRARY_PATH:-/music}
+      SyncConfig__RescanIntervalMinutes: ${RESCAN_INTERVAL_MINUTES:-1440}
       SyncConfig__ArtworkApiUrl: ${ARTWORK_API_URL:-http://animated-artworks:8080}
       SyncConfig__DelayBetweenApiRequestsMs: ${DELAY_BETWEEN_API_REQUESTS_MS:-2000}
       SyncConfig__MinVariantResolution: ${MIN_VARIANT_RESOLUTION:-1000}

@@ -14,6 +14,7 @@ The downloaded artworks are saved as `cover.webp` in the respective album folder
 - Supported by Navidrome
 - Configurable minimum resolution for artworks
 - Configurable WebP quality for artwork conversion
+- Configurable rescan interval for periodic library scans
 
 ## Getting Started (Docker)
 
@@ -38,6 +39,7 @@ This will start two containers: the downloader and the API. The downloader will 
 ## Configuration
 - `MIN_VARIANT_RESOLUTION`: Minimum resolution for downloaded artworks, set lower to reduce file size. The closest available variant with at least this resolution will be downloaded.
 - `WEBP_QUALITY`: Quality setting for WebP conversion (0-100), lower values reduce file size but also quality
+- `RESCAN_INTERVAL_MINUTES`: Interval in minutes for rescanning the music library for missing artworks. Set to 0 to disable periodic rescanning.
 
 ## How It Works
 
