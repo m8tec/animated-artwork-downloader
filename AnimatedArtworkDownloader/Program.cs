@@ -10,7 +10,12 @@ builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfigurati
 	.ReadFrom.Services(services)
 	.Enrich.FromLogContext());
 
-builder.Services.Configure<SyncConfig>(builder.Configuration.GetSection("SyncConfig"));
+builder.Services.AddOptions<SyncConfig>()
+	.Bind(builder.Configuration.GetSection("SyncConfig"))
+	.Validate(
+		config => SyncConfig.IsValidOutputFileName(config.OutputFileName),
+		"SyncConfig:OutputFileName must be a plain file name without directory parts (e.g. 'cover.webp').")
+	.ValidateOnStart();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<LibraryScanner>();
