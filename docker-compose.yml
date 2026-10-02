@@ -24,6 +24,7 @@ services:
       SyncConfig__DelayBetweenApiRequestsMs: ${DELAY_BETWEEN_API_REQUESTS_MS:-2000}
       SyncConfig__MinVariantResolution: ${MIN_VARIANT_RESOLUTION:-1000}
       SyncConfig__WebpQuality: ${WEBP_QUALITY:-50}
+      SyncConfig__OutputFileName: ${OUTPUT_FILE_NAME:-cover.webp}
     volumes:
       - ${MUSIC_LIBRARY_PATH:?Set MUSIC_LIBRARY_PATH in .env}:${LIBRARY_PATH:-/music}
       - ${CACHE_DIRECTORY:-./data}:/data

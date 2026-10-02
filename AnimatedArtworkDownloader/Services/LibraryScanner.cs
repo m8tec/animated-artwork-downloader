@@ -11,6 +11,7 @@ public class LibraryScanner(IOptions<SyncConfig> config, ILogger<LibraryScanner>
     public IEnumerable<AlbumDirectory> ScanLibrary()
     {
         var basePath = config.Value.LibraryPath;
+        var outputFileName = config.Value.OutputFileName;
 
         if (string.IsNullOrWhiteSpace(basePath) || !Directory.Exists(basePath))
         {
@@ -45,9 +46,9 @@ public class LibraryScanner(IOptions<SyncConfig> config, ILogger<LibraryScanner>
 
             try
             {
-                if (File.Exists(Path.Combine(dir, "cover.webp")))
+                if (File.Exists(Path.Combine(dir, outputFileName)))
                 {
-                    logger.LogDebug("Skipping dir '{Dir}': cover.webp already exists.", dir);
+                    logger.LogDebug("Skipping dir '{Dir}': {OutputFileName} already exists.", dir, outputFileName);
                     continue;
                 }
 

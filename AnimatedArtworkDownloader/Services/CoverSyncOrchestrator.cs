@@ -50,7 +50,7 @@ public class CoverSyncOrchestrator(
                 continue;
             }
 
-            var outputPath = Path.Combine(album.Path, "cover.webp");
+            var outputPath = Path.Combine(album.Path, config.Value.OutputFileName);
 
             try
             {
