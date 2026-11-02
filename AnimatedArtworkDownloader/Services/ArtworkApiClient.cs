@@ -16,6 +16,12 @@ public class ArtworkApiClient(
     private static readonly TimeSpan StartupProbeInterval = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan StartupProbeTimeout = TimeSpan.FromSeconds(3);
 
+    private static readonly IReadOnlyDictionary<ArtworkVariant, string> PlaylistUrlPropertyNames = new Dictionary<ArtworkVariant, string>
+    {
+        [ArtworkVariant.Square] = "url",
+        [ArtworkVariant.Tall] = "url_tall"
+    };
+
     public async Task WaitUntilApiIsReachableAsync(CancellationToken cancellationToken)
     {
         var baseUrl = config.Value.ArtworkApiUrl.Trim();
@@ -84,18 +90,25 @@ public class ArtworkApiClient(
         var payload = await response.Content.ReadAsStringAsync(cancellationToken);
         
         using var doc = JsonDocument.Parse(payload);
-        if (!doc.RootElement.TryGetProperty("url", out var playlistUrlElement))
+        var playlistUrls = new Dictionary<ArtworkVariant, string>();
+
+        foreach (var (variant, propertyName) in PlaylistUrlPropertyNames)
         {
-            return ArtworkSearchResult.NotFound("No url property in API response");
+            if (doc.RootElement.TryGetProperty(propertyName, out var playlistUrlElement)
+                && playlistUrlElement.ValueKind == JsonValueKind.String
+                && playlistUrlElement.GetString() is { } playlistUrl
+                && !string.IsNullOrWhiteSpace(playlistUrl))
+            {
+                playlistUrls[variant] = playlistUrl;
+            }
         }
 
-        var playlistUrl = playlistUrlElement.GetString();
-        if (string.IsNullOrWhiteSpace(playlistUrl))
+        if (playlistUrls.Count == 0)
         {
             return ArtworkSearchResult.NotFound("No m3u8 URL in API response");
         }
 
-        return ArtworkSearchResult.Found(playlistUrl);
+        return ArtworkSearchResult.Found(playlistUrls);
     }
 
     private static string BuildSearchEndpoint(string baseUrl, string artist, string album)
