@@ -27,7 +27,7 @@ public class Worker(
                 
                 foreach (var album in albumsWithoutCover)
                 {
-                    logger.LogDebug("Needs Cover: {Artist} - {Album} ({Path})", album.ArtistName, album.AlbumName, album.Path);
+                    logger.LogDebug("Needs Cover: {Artist} - {Album} ({Path}), missing {Variants}", album.ArtistName, album.AlbumName, album.Path, string.Join(", ", album.MissingVariants));
                 }
 
                 await coverSyncOrchestrator.ProcessMissingCoversAsync(albumsWithoutCover, stoppingToken);

@@ -11,11 +11,18 @@ public class LibraryScanner(IOptions<SyncConfig> config, ILogger<LibraryScanner>
     public IEnumerable<AlbumDirectory> ScanLibrary()
     {
         var basePath = config.Value.LibraryPath;
-        var outputFileName = config.Value.OutputFileName;
 
         if (string.IsNullOrWhiteSpace(basePath) || !Directory.Exists(basePath))
         {
             logger.LogError("Library path '{Path}' does not exist or is not configured.", basePath);
+            yield break;
+        }
+
+        var configuredVariants = config.Value.ArtworkVariants.GetSingleVariants();
+
+        if (configuredVariants.Count == 0)
+        {
+            logger.LogError("No artwork variants configured. Set ArtworkVariants to Square, Tall or both.");
             yield break;
         }
 
@@ -42,13 +49,18 @@ public class LibraryScanner(IOptions<SyncConfig> config, ILogger<LibraryScanner>
                     totalDirectories);
             }
 
+            ArtworkVariant[] missingVariants;
             string? firstAudioFile;
 
             try
             {
-                if (File.Exists(Path.Combine(dir, outputFileName)))
+                missingVariants = configuredVariants
+                    .Where(v => !File.Exists(Path.Combine(dir, config.Value.GetOutputFileName(v))))
+                    .ToArray();
+
+                if (missingVariants.Length == 0)
                 {
-                    logger.LogDebug("Skipping dir '{Dir}': {OutputFileName} already exists.", dir, outputFileName);
+                    logger.LogDebug("Skipping dir '{Dir}': all configured covers already exist.", dir);
                     continue;
                 }
 
@@ -94,7 +106,7 @@ public class LibraryScanner(IOptions<SyncConfig> config, ILogger<LibraryScanner>
             
             if (!string.IsNullOrWhiteSpace(artist) && !string.IsNullOrWhiteSpace(album))
             {
-                yield return new AlbumDirectory(dir, artist.Trim(), album.Trim());
+                yield return new AlbumDirectory(dir, artist.Trim(), album.Trim(), missingVariants);
             }
             else
             {

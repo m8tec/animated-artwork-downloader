@@ -15,6 +15,12 @@ builder.Services.AddOptions<SyncConfig>()
 	.Validate(
 		config => SyncConfig.IsValidOutputFileName(config.OutputFileName),
 		"SyncConfig:OutputFileName must be a plain file name without directory parts (e.g. 'cover.webp').")
+	.Validate(
+		config => SyncConfig.IsValidOutputFileName(config.TallOutputFileName),
+		"SyncConfig:TallOutputFileName must be a plain file name without directory parts (e.g. 'cover-tall.webp').")
+	.Validate(
+		config => !string.Equals(config.OutputFileName, config.TallOutputFileName, StringComparison.OrdinalIgnoreCase),
+		"SyncConfig:OutputFileName and SyncConfig:TallOutputFileName must be different.")
 	.ValidateOnStart();
 
 builder.Services.AddHttpClient();

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using AnimatedArtworkDownloader.Configuration;
 using AnimatedArtworkDownloader.Models;
@@ -7,19 +8,19 @@ namespace AnimatedArtworkDownloader.Services;
 
 public class FileNegativeCoverCache(IOptions<SyncConfig> config, ILogger<FileNegativeCoverCache> logger) : INegativeCoverCache
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, Converters = { new JsonStringEnumConverter() } };
     private readonly object _syncRoot = new();
     private Dictionary<string, NegativeCacheEntry>? _entries;
 
     private const string NegativeCacheFileName = "negative-cache.json";
 
-    public bool IsCachedAsMissing(AlbumDirectory album)
+    public bool IsCachedAsMissing(AlbumDirectory album, ArtworkVariant variant)
     {
         lock (_syncRoot)
         {
             EnsureLoaded();
 
-            var key = BuildKey(album.ArtistName, album.AlbumName);
+            var key = BuildKey(album.ArtistName, album.AlbumName, variant);
             if (_entries == null || !_entries.TryGetValue(key, out var entry))
             {
                 return false;
@@ -29,25 +30,25 @@ public class FileNegativeCoverCache(IOptions<SyncConfig> config, ILogger<FileNeg
         }
     }
 
-    public void StoreMissingCover(AlbumDirectory album, string reason)
+    public void StoreMissingCover(AlbumDirectory album, ArtworkVariant variant, string reason)
     {
         lock (_syncRoot)
         {
             EnsureLoaded();
 
-            var key = BuildKey(album.ArtistName, album.AlbumName);
-            _entries![key] = new NegativeCacheEntry(album.ArtistName, album.AlbumName, reason, DateTimeOffset.UtcNow);
+            var key = BuildKey(album.ArtistName, album.AlbumName, variant);
+            _entries![key] = new NegativeCacheEntry(album.ArtistName, album.AlbumName, reason, DateTimeOffset.UtcNow, variant);
             Persist();
         }
     }
 
-    public void Remove(AlbumDirectory album)
+    public void Remove(AlbumDirectory album, ArtworkVariant variant)
     {
         lock (_syncRoot)
         {
             EnsureLoaded();
 
-            var key = BuildKey(album.ArtistName, album.AlbumName);
+            var key = BuildKey(album.ArtistName, album.AlbumName, variant);
             if (_entries!.Remove(key))
             {
                 Persist();
@@ -73,8 +74,8 @@ public class FileNegativeCoverCache(IOptions<SyncConfig> config, ILogger<FileNeg
         try
         {
             var json = File.ReadAllText(cacheFilePath);
-            var list = JsonSerializer.Deserialize<List<NegativeCacheEntry>>(json) ?? [];
-            _entries = list.ToDictionary(e => BuildKey(e.ArtistName, e.AlbumName), StringComparer.OrdinalIgnoreCase);
+            var list = JsonSerializer.Deserialize<List<NegativeCacheEntry>>(json, JsonOptions) ?? [];
+            _entries = list.ToDictionary(e => BuildKey(e.ArtistName, e.AlbumName, e.Variant), StringComparer.OrdinalIgnoreCase);
         }
         catch (Exception ex)
         {
@@ -92,6 +93,7 @@ public class FileNegativeCoverCache(IOptions<SyncConfig> config, ILogger<FileNeg
         var payload = _entries!.Values
             .OrderBy(e => e.ArtistName, StringComparer.OrdinalIgnoreCase)
             .ThenBy(e => e.AlbumName, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(e => e.Variant)
             .ToList();
 
         var json = JsonSerializer.Serialize(payload, JsonOptions);
@@ -109,6 +111,6 @@ public class FileNegativeCoverCache(IOptions<SyncConfig> config, ILogger<FileNeg
         return Path.Combine(basePath, ".animatedartworkdownloader", NegativeCacheFileName);
     }
 
-    private static string BuildKey(string artist, string album)
-        => $"{artist.Trim().ToLowerInvariant()}|{album.Trim().ToLowerInvariant()}";
+    private static string BuildKey(string artist, string album, ArtworkVariant variant)
+        => $"{artist.Trim().ToLowerInvariant()}|{album.Trim().ToLowerInvariant()}|{variant}";
 }

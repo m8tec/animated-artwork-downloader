@@ -3,5 +3,6 @@ namespace AnimatedArtworkDownloader.Models;
 public record AlbumDirectory(
     string Path,
     string ArtistName,
-    string AlbumName
+    string AlbumName,
+    IReadOnlyList<ArtworkVariant> MissingVariants
 );
